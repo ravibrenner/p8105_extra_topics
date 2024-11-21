@@ -9,6 +9,22 @@ output: github_document
 library(tidyverse)
 library(glmnet)
 set.seed(12345)
+
+knitr::opts_chunk$set(
+  fig.width = 6,
+  fig.asp = .6,
+  out.width = "90%"
+)
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
 ```
 
 ## Try Lasso regression
@@ -18,29 +34,70 @@ import and clean data
 bwt_df <- read_csv("data/birthweight.csv") |> 
   janitor::clean_names() |>
   mutate(
-    babysex = 
-        case_match(babysex,
-            1 ~ "male",
-            2 ~ "female"
-        ),
+    babysex = case_match(babysex,
+                         1 ~ "male",
+                         2 ~ "female"),
     babysex = fct_infreq(babysex),
-    frace = 
-        case_match(frace,
-            1 ~ "white",
-            2 ~ "black", 
-            3 ~ "asian", 
-            4 ~ "puerto rican", 
-            8 ~ "other"),
+    frace = case_match(frace,
+                       1 ~ "white",
+                       2 ~ "black", 
+                       3 ~ "asian",
+                       4 ~ "puerto rican",
+                       8 ~ "other"),
     frace = fct_infreq(frace),
-    mrace = 
-        case_match(mrace,
-            1 ~ "white",
-            2 ~ "black", 
-            3 ~ "asian", 
-            4 ~ "puerto rican",
-            8 ~ "other"),
-    mrace = fct_infreq(mrace),
-    malform = as.logical(malform)) |> 
+    mrace = case_match(mrace,
+                       1 ~ "white",
+                       2 ~ "black",
+                       3 ~ "asian", 
+                       4 ~ "puerto rican",
+                       8 ~ "other"),
+    mrace = fct_infreq(mrace)) |> 
   sample_n(200)
+```
+
+Contruct inputs for `glmnet`
+```{r}
+x = model.matrix(bwt ~., data = bwt_df)[,-1]
+y = bwt_df |> pull(bwt)
+```
+
+fit lasso for several lambdas
+```{r}
+lambda = 10^seq(-2, 2.75, by = 0.1)
+
+lasso_fit <- glmnet(x = x, y = y, lambda = lambda)
+
+lasso_cv <- cv.glmnet(x = x, y = y, lambda = lambda)
+
+lambda_opt = lasso_cv[["lambda.min"]]
+```
+
+usual lasso plot
+
+```{r}
+lasso_fit |>
+  broom::tidy() |>
+  filter(term != "(Intercept)") |>
+  select(term, lambda, estimate) |>
+  complete(term, lambda, fill = list(estimate = 0)) |>
+  ggplot(aes(x = lambda, y = estimate, group = term, color = term)) + 
+  geom_line() +
+  geom_vline(xintercept = lambda_opt, color = "red")
+```
+
+```{r}
+final_lasso_fit <- glmnet(x = x, y = y, lambda = lambda_opt)
+
+final_lasso_fit |>
+  broom::tidy()
+```
+
+Look at CV results
+```{r}
+lasso_cv |>
+  broom::tidy() |>
+  ggplot(aes(x = log(lambda,10), y = estimate)) +
+  geom_point() +
+  geom_vline(xintercept = log(lambda_opt,10), color = "red")
 ```
 
