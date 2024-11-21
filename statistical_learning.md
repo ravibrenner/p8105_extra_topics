@@ -157,3 +157,49 @@ lasso_cv |>
 ```
 
 <img src="statistical_learning_files/figure-gfm/unnamed-chunk-6-1.png" width="90%" />
+
+## Cluster pokemons
+
+``` r
+pokemon_df = 
+  read_csv("data/pokemon.csv") |> 
+  janitor::clean_names() |> 
+  select(hp, speed)
+```
+
+    ## Rows: 800 Columns: 13
+    ## ── Column specification ────────────────────────────────────────────────────────
+    ## Delimiter: ","
+    ## chr (3): Name, Type 1, Type 2
+    ## dbl (9): #, Total, HP, Attack, Defense, Sp. Atk, Sp. Def, Speed, Generation
+    ## lgl (1): Legendary
+    ## 
+    ## ℹ Use `spec()` to retrieve the full column specification for this data.
+    ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
+
+``` r
+pokemon_df |>
+  ggplot(aes(x = hp, y = speed)) + 
+  geom_point()
+```
+
+<img src="statistical_learning_files/figure-gfm/unnamed-chunk-8-1.png" width="90%" />
+
+Use K-means to cluster these pokemon
+
+``` r
+kmeans_fit <- kmeans(x = pokemon_df, centers = 3)
+```
+
+Plot these results
+
+``` r
+pokemon_df <- 
+  broom::augment(kmeans_fit, pokemon_df)
+
+pokemon_df |>
+  ggplot(aes(x = hp, y = speed, color = .cluster)) + 
+  geom_point()
+```
+
+<img src="statistical_learning_files/figure-gfm/unnamed-chunk-10-1.png" width="90%" />
