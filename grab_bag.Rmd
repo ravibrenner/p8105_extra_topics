@@ -59,5 +59,7 @@ Once Github copilot is activated, you can use it to complete code.
 
 (Need to log in to account and potentially pay for this service also).
 
+Potentially a helpful option to speed things up, especially as chatbots improve over time.
 
+Can also upload files to ChatGPT, and ask it to do the data manipulation and stuff for you.
 
