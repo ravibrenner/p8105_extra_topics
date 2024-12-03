@@ -1,0 +1,63 @@
+---
+title: "Grab bag topics"
+author: "Ravi Brenner"
+date: "2024-12-03"
+output: github_document
+---
+
+## To handle PHI
+
+-   Create a folder for the PHI in an entirely separate location from the project/git repository
+
+-   create a symbolic link in your git repo to the external folder, e.g. using "ln -s PATH NAME" in terminal
+
+-   Also add that folder to .gitignore, just to be safe
+
+Dropbox is a separate story...will sync automatically...so good to avoid if using PHI
+
+## Using projectr package 
+
+(From Professor Goldsmith)
+
+Use projectr::proj_start(proj_path, proj_data_path) to set up default folders, default .gitignore file, readme, etc.
+
+Could be useful! Especially for PHI use, it automatically sets up the data folder being somewhere else.
+
+`cabinets` package by nt-williams is another cool option https://github.com/nt-williams/cabinets
+
+## The `here` package
+
+`here` keeps track of where files are, with subfolders etc. by telling R to always start from the project directory location, and go down from there.
+
+(I've used this before, can be finicky if not using a .Rproj but it works well and keeps things organized).
+
+## Always use regression
+
+t.test example
+```{r}
+with(mtcars, t.test(mpg[am == 0], mpg[am == 1])) |>
+  broom::tidy()
+```
+
+Same as this
+```{r}
+t.test(mpg ~ am, data = mtcars) |>
+  broom::tidy()
+```
+
+But these are the same as using `lm`
+```{r}
+lm(mpg ~ am, data = mtcars) |>
+  broom::tidy()
+```
+
+(also see this article for more https://lindeloev.github.io/tests-as-linear/)
+
+## LLMs in data science
+
+Once Github copilot is activated, you can use it to complete code.
+
+(Need to log in to account and potentially pay for this service also).
+
+
+
